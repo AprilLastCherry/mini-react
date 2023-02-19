@@ -1,0 +1,11 @@
+###
+ # @Author: Leon
+ # @Date: 2023-02-19 18:24:31
+ # @LastEditors: 最后编辑
+ # @LastEditTime: 2023-02-19 20:03:20
+ # @description: 文件说明
+### 
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+npx --no-install commitlint -e 
