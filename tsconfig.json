@@ -1,7 +1,6 @@
 {
 	"compileOnSave": true,
 	"compilerOptions": {
-		"baseUrl": "./packages",
 		"outDir": "./dist/out-tsc",
 		"sourceMap": true,
 		"declaration": false,
@@ -11,7 +10,11 @@
 		"importHelpers": true,
 		"target": "es2015",
 		"module": "es2020",
-		"lib": ["es2018", "dom"]
+		"lib": ["es2018", "dom"],
+		"baseUrl": "./packages",
+		"paths": {
+			"hostConfig": ["./react-reconciler/src/hostConfig.ts"]
+		}
 	},
 	"angularCompilerOptions": {
 		"enableI18nLegacyMessageIdFormat": false,

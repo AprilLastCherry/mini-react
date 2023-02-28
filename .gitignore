@@ -1,2 +1,5 @@
 /node_modules
+/dist
+/packages/react/node_modules
+/packages/react-reconciler/node_modules
 .history
