@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-28 23:41:29
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-01 00:05:20
+ * @LastEditTime: 2023-03-01 18:25:18
  * @description: 文件说明
  */
 import { Container } from 'hostConfig';
@@ -17,12 +17,13 @@ import {
 import { scheduleUpdateOnFiber } from './workLoop';
 import { HostRoot } from './workTags';
 
-// ReactDOM.createRoot(rootElement) 中的 createRoot 调用
+// ReactDOM.createRoot(rootElement) 中的 createRoot 调用会触发，
 export function createContainer(container: Container) {
 	const hostRootFiber = new FiberNode(HostRoot, {}, null);
+	// 将 FiberRootNode 和 hostRootFiber 联系起来
 	const root = new FiberRootNode(container, hostRootFiber);
 
-	hostRootFiber.updateQueue = createUpdateQueue();
+	hostRootFiber.updateQueue = createUpdateQueue(); // 创建一个update队列，值为null { shared: { pending: null } }
 
 	return root;
 }
@@ -32,10 +33,12 @@ export function updateContainer(
 	element: ReactElementType | null,
 	root: FiberRootNode
 ) {
+	// 将 hostRootFiber 和普通 fiberNode 联系起来
 	const hostRootFiber = root.current;
+	// 为传入的reactElement创建一个update
 	const update = createUpdate<ReactElementType | null>(element);
 
-	// 队列中加入创建好的updateQueue
+	// 队列中加入创建好的update，即hostRootFiber.updateQueue.shared.pending = update;
 	enqueueUpdate(
 		hostRootFiber.updateQueue as UpdateQueue<ReactElementType | null>,
 		update
