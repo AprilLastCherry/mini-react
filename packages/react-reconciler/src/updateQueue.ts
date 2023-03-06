@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-25 21:28:28
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-02 15:10:41
+ * @LastEditTime: 2023-03-03 13:32:54
  * @description: 文件说明
  */
 import { Action } from 'shared/ReactTypes';
@@ -51,7 +51,7 @@ export const processUpdateQueue = <State>(
 		memoizedState: baseState
 	};
 
-	// 存在新的跟新值，判断是函数还是新State，如果是函数，直接调用，否则直接赋值
+	// 存在新的更新值，判断是函数还是新State，如果是函数，直接调用，否则直接赋值
 	if (pendingUpdate !== null) {
 		const action = pendingUpdate.action;
 		if (action instanceof Function) {

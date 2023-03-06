@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-22 20:58:47
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-02 15:48:39
+ * @LastEditTime: 2023-03-03 14:10:17
  * @description: 文件说明
  */
 import { Props, Key, Ref, ReactElementType } from 'shared/ReactTypes';
@@ -10,6 +10,7 @@ import { FunctionComponent, HostComponent, WorkTag } from './workTags';
 import { Flags, NoFlags } from './fiberFlags';
 import { Container } from 'hostConfig';
 
+// 介于ReactElment和DomELement之间的数据FiberNode，FiberNode用来关联两者，Reconciler算法操作fiberNode去调度协调两者
 export class FiberNode {
 	type: any;
 	tag: WorkTag;
@@ -27,6 +28,7 @@ export class FiberNode {
 	memoizedState: any;
 	alternate: FiberNode | null;
 	flags: Flags;
+	subtreeFlags: Flags;
 	updateQueue: unknown;
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
@@ -34,9 +36,9 @@ export class FiberNode {
 		this.key = key;
 		this.ref = null;
 
-		// HostComponent <div> div Dom
+		// 对于HostComponent来说，比如jsx的<div>中的stateNode保存的就是div的Dom
 		this.stateNode = null;
-		// FiberNode类型 FunctionComponent () => {}
+		// FiberNode类型， 对于FunctionComponent来说，表示本身() => {}
 		this.type = null;
 
 		/** 构成树状结构 */
@@ -46,18 +48,22 @@ export class FiberNode {
 		this.sibling = null;
 		// 指向子FiberNode
 		this.child = null;
-		// 同级的FiberNode, 当前的FiberNode是下标
+		// 同级的FiberNode, 当前FiberNode的下标
 		this.index = 0;
 
 		/** 作为工作单元 */
+		// 作为工作单元，刚开始工作的时候的Props
 		this.pendingProps = pendingProps;
+		// 工作完成后确定下来的Props
 		this.memoizedProps = null;
 		this.memoizedState = null;
+		// 用于真实UI树，和wip树的切换，如果当前是current当前的FiberNode树，指向Wip的FiberNode，反之亦然，双缓存技术
 		this.alternate = null;
 		this.updateQueue = null;
 
 		// 副作用
 		this.flags = NoFlags;
+		this.subtreeFlags = NoFlags;
 	}
 }
 
@@ -89,13 +95,16 @@ export const createWorkInProgress = (
 		wip.type = current.type;
 		wip.stateNode = current.stateNode;
 
+		// 当前的节点，创建出新的fiberNode，当前fiberNode就是过去式了
 		wip.alternate = current;
+		// ??
 		current.alternate = wip;
 	} else {
 		// update
 		wip.pendingProps = pendingProps;
-		// 副作用的东西清楚掉，是上一次遗留的内容
+		// 副作用的东西清除掉，是上一次遗留的内容
 		wip.flags = NoFlags;
+		wip.subtreeFlags = NoFlags;
 	}
 
 	wip.type = current.type;

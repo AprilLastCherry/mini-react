@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-03-02 15:27:24
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-02 15:56:11
+ * @LastEditTime: 2023-03-03 14:46:14
  * @description: 文件说明
  */
 import { REACT_ELEMENT_TYPE } from 'shared/ReactSymbols';
@@ -13,6 +13,7 @@ import { HostText } from './workTags';
 
 // 是否追踪副作用
 function ChildReconciler(shouldTrackEffects: boolean) {
+	// ReactElement 生成 FiberNode
 	function reconcileSingleElement(
 		returnFiber: FiberNode,
 		currentFiber: FiberNode | null,
@@ -20,6 +21,7 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 	) {
 		// 根据element创建一个Fiber
 		const fiber = createFiberFromElement(element);
+		// 当前工作单元的WorkInProgress是它的父节点
 		fiber.return = returnFiber;
 		return fiber;
 	}
@@ -29,13 +31,15 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 		currentFiber: FiberNode | null,
 		content: string | number
 	) {
-		// 根据element创建一个Fiber
+		// 根据 文本内容 创建一个Fiber
 		const fiber = new FiberNode(HostText, { content }, null);
 		fiber.return = returnFiber;
 		return fiber;
 	}
 
+	// 是否需要处理副作用，打上插入DOM标记
 	function placeSingChild(fiber: FiberNode) {
+		// fiber.alternate 之前没有值表示mount
 		if (shouldTrackEffects && fiber.alternate === null) {
 			fiber.flags |= Placement;
 		}

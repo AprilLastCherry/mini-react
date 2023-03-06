@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-25 16:31:52
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-02 15:00:32
+ * @LastEditTime: 2023-03-02 16:44:29
  * @description: 文件说明
  */
 import { beginWork } from './beginWork';
@@ -63,6 +63,12 @@ function renderRoot(root: FiberRootNode) {
 		}
 		// eslint-disable-next-line no-constant-condition
 	} while (true);
+
+	const finishedWord = root.current.alternate;
+	root.finishedWord = finishedWord;
+
+	// wip fiberNode树 树中的flags
+	commitRoot(root);
 }
 
 function workLoop() {

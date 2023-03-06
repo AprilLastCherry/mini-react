@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-25 16:29:10
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-02 15:58:04
+ * @LastEditTime: 2023-03-03 15:01:55
  * @description: 文件说明
  */
 import { ReactElementType } from 'shared/ReactTypes';
@@ -14,7 +14,6 @@ import { HostComponent, HostRoot, HostText } from './workTags';
 // 递归中的递阶段
 export const beginWork = (wip: FiberNode) => {
 	// 比较，返回 childFiberNode
-
 	switch (wip.tag) {
 		case HostRoot:
 			return updateHostRoot(wip);
@@ -28,6 +27,8 @@ export const beginWork = (wip: FiberNode) => {
 			}
 			break;
 	}
+
+	return null;
 };
 
 // 根节点的子节点
@@ -38,12 +39,14 @@ function updateHostRoot(wip: FiberNode) {
 
 	updateQueue.shared.pending = null;
 
+	// 新的pending值替换旧的baseState
 	const { memoizedState } = processUpdateQueue(baseState, pending);
 
 	wip.memoizedState = memoizedState;
 
 	const nextChildren = wip.memoizedState;
 
+	// wip添加child
 	reconcilerChildren(wip, nextChildren);
 
 	return wip.child;
