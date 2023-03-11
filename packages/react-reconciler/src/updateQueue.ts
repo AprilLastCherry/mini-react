@@ -2,9 +2,10 @@
  * @Author: Leon
  * @Date: 2023-02-25 21:28:28
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-03 13:32:54
+ * @LastEditTime: 2023-03-11 19:19:45
  * @description: 文件说明
  */
+import { Dispatch } from 'react/src/currentDispatcher';
 import { Action } from 'shared/ReactTypes';
 
 export interface Update<State> {
@@ -15,6 +16,7 @@ export interface UpdateQueue<State> {
 	shared: {
 		pending: Update<State> | null;
 	};
+	dispatch: Dispatch<State> | null;
 }
 
 export const createUpdate = <State>(action: Action<State>): Update<State> => {
@@ -27,7 +29,8 @@ export const createUpdateQueue = <State>() => {
 	return {
 		shared: {
 			pending: null
-		}
+		},
+		dispatch: null
 	} as UpdateQueue<State>;
 };
 
