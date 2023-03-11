@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-22 20:58:47
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-03 14:10:17
+ * @LastEditTime: 2023-03-07 16:15:34
  * @description: 文件说明
  */
 import { Props, Key, Ref, ReactElementType } from 'shared/ReactTypes';
@@ -82,6 +82,7 @@ export class FiberRootNode {
 	}
 }
 
+// 创建一个workInProgress，是一个fiberNode
 export const createWorkInProgress = (
 	current: FiberNode,
 	pendingProps: Props
@@ -121,7 +122,7 @@ export function createFiberFromElement(element: ReactElementType) {
 	const { type, key, props } = element;
 	let fiberTag: WorkTag = FunctionComponent;
 	if (typeof type === 'string') {
-		// <div> type 'div'
+		// 比如<div>的type就是'div'
 		fiberTag = HostComponent;
 	} else if (typeof type !== 'function' && __DEV__) {
 		console.warn('为定义的type类型', element);

@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-21 12:58:30
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-01 00:50:39
+ * @LastEditTime: 2023-03-06 23:07:55
  * @description: 文件说明
  */
 import path from 'path';
@@ -29,7 +29,8 @@ export function getPackageJSON(pkgName) {
 
 export function getBaseRollupPlugins({
 	alias = {
-		__DEV__: true
+		__DEV__: true,
+		preventAssignment: true
 	},
 	typescript = {}
 } = {}) {

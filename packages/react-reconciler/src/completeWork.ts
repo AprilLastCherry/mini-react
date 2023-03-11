@@ -2,21 +2,28 @@
  * @Author: Leon
  * @Date: 2023-02-25 16:29:18
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-03 17:36:50
+ * @LastEditTime: 2023-03-11 15:00:28
  * @description: 文件说明
  */
 
 import { FiberNode } from './fiber';
 import { NoFlags } from './fiberFlags';
 import {
+	Container,
 	appendInitialChild,
 	createInstace,
 	createTextInstace
 } from 'hostConfig';
-import { HostComponent, HostRoot, HostText } from './workTags';
+import {
+	FunctionComponent,
+	HostComponent,
+	HostRoot,
+	HostText
+} from './workTags';
 
 // 递归中的归阶段
 export const completeWork = (wip: FiberNode) => {
+	console.log('completeWork', wip);
 	const newProps = wip.pendingProps;
 	const current = wip.alternate;
 
@@ -26,7 +33,7 @@ export const completeWork = (wip: FiberNode) => {
 				// update
 			} else {
 				// 1. 构建离屏DOM
-				const instance = createInstace(wip.type, newProps);
+				const instance = createInstace(wip.type);
 				// 2. 将DOM插入到DOM树中
 				appendAllChildren(instance, wip);
 				// 对于HostComponent来说，比如jsx的<div>中的stateNode保存的就是div的Dom，return 才是父节点
@@ -53,6 +60,10 @@ export const completeWork = (wip: FiberNode) => {
 			bubbleProperties(wip);
 			return null;
 
+		case FunctionComponent:
+			bubbleProperties(wip);
+			return null;
+
 		default:
 			if (__DEV__) {
 				console.warn('completeWork未实现的类型', wip.tag);
@@ -60,14 +71,15 @@ export const completeWork = (wip: FiberNode) => {
 	}
 };
 
-function appendAllChildren(parent: FiberNode, wip: FiberNode) {
+function appendAllChildren(parent: Container, wip: FiberNode) {
 	let node = wip.child;
 	while (node !== null) {
 		if (node.tag === HostComponent || node.tag === HostText) {
 			appendInitialChild(parent, node.stateNode);
 		} else if (node.child !== null) {
-			// 接着往下找子节点
+			// 接着往下找子节点, 将子节点与当前节点构建父子级关系
 			node.child.return = node;
+			// 切换成子节点
 			node = node.child;
 			continue;
 		}
@@ -99,6 +111,7 @@ function bubbleProperties(wip: FiberNode) {
 	let subtreeFlags = NoFlags;
 	let child = wip.child;
 
+	// 将子节点和子节点的兄弟节点的标识整合放到subtreeFlags中，自身的flag不整合进subtreeFlags
 	while (child !== null) {
 		subtreeFlags |= child.subtreeFlags;
 		subtreeFlags |= child.flags;

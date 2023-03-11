@@ -2,12 +2,14 @@
  * @Author: Leon
  * @Date: 2023-02-25 16:31:52
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-02 16:44:29
+ * @LastEditTime: 2023-03-08 11:13:36
  * @description: 文件说明
  */
 import { beginWork } from './beginWork';
+import { commitMutationEffects } from './commitWork';
 import { completeWork } from './completeWork';
 import { createWorkInProgress, FiberNode, FiberRootNode } from './fiber';
+import { MutationMask, NoFlags } from './fiberFlags';
 import { HostRoot } from './workTags';
 
 let workInProgress: FiberNode | null = null;
@@ -66,9 +68,42 @@ function renderRoot(root: FiberRootNode) {
 
 	const finishedWord = root.current.alternate;
 	root.finishedWord = finishedWord;
-
 	// wip fiberNode树 树中的flags
 	commitRoot(root);
+	console.log('commitRoot', root);
+}
+
+function commitRoot(root: FiberRootNode) {
+	const finishedWork = root.finishedWord;
+
+	if (finishedWork === null) {
+		//不存在commit阶段
+		return;
+	}
+	if (__DEV__) {
+		console.warn('commit阶段开始', finishedWork);
+	}
+
+	// 重置，数据已经存放到变量 finishedWork 中
+	root.finishedWord = null;
+
+	// 判断是否存在3个子接待您需要执行的操作
+	// 判断root本身flags和root的subtreeFlags
+	const subtreeHasEffect =
+		(finishedWork.subtreeFlags & MutationMask) !== NoFlags;
+	const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags;
+
+	if (subtreeHasEffect || rootHasEffect) {
+		// beforeMutation
+		// mutation Placement
+		commitMutationEffects(finishedWork);
+		// 会在mutation和layout之间切换fiberNode树
+		root.current = finishedWork;
+
+		// layout
+	} else {
+		root.current = finishedWork;
+	}
 }
 
 function workLoop() {
@@ -79,7 +114,7 @@ function workLoop() {
 
 // 递归的递阶段
 function performUnitOfWork(fiber: FiberNode) {
-	// 节点递阶段处理后返回的下一个节点
+	// 节点递阶段处理后返回的当前节点的下一个节点（子节点）
 	const next = beginWork(fiber);
 	// 当前节点已经处理过了，新的Props变成旧值
 	fiber.memoizedProps = fiber.pendingProps;
@@ -105,7 +140,7 @@ function completeUnitOfWork(fiber: FiberNode) {
 			workInProgress = sibling;
 			return;
 		} else {
-			// 找不到兄弟节点，开始往上找父节点，父节点存在就执行归阶段，一直到
+			// 找不到兄弟节点，开始往上找父节点，父节点存在就执行归阶段，一直到没有父节点
 			node = node.return;
 			workInProgress = node;
 		}

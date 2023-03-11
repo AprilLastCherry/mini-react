@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-03-02 15:27:24
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-03 14:46:14
+ * @LastEditTime: 2023-03-07 17:29:39
  * @description: 文件说明
  */
 import { REACT_ELEMENT_TYPE } from 'shared/ReactSymbols';
@@ -26,6 +26,7 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 		return fiber;
 	}
 
+	// Text 生成 FiberNode
 	function reconcileSingleText(
 		returnFiber: FiberNode,
 		currentFiber: FiberNode | null,
@@ -41,6 +42,7 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 	function placeSingChild(fiber: FiberNode) {
 		// fiber.alternate 之前没有值表示mount
 		if (shouldTrackEffects && fiber.alternate === null) {
+			console.log('插入', fiber, Placement);
 			fiber.flags |= Placement;
 		}
 

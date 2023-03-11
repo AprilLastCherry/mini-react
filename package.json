@@ -5,7 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"lint": "eslint --ext .js,.ts,.jsx,.tsx --fix --quiet ./packages",
-		"build:dev": "rimraf dist && rollup --bundleConfigAsCjs --config scripts/rollup/react.config.js"
+		"build:dev": "rimraf dist && rollup --bundleConfigAsCjs --config scripts/rollup/dev.config.js",
+		"demo": "vite serve demos/test-fc --config scripts/vite/vite.config.js --force"
 	},
 	"keywords": [],
 	"author": "",
@@ -13,21 +14,27 @@
 	"devDependencies": {
 		"@commitlint/cli": "^17.4.4",
 		"@commitlint/config-conventional": "^17.4.4",
+		"@rollup/plugin-alias": "^4.0.3",
 		"@rollup/plugin-commonjs": "^24.0.1",
+		"@types/react": "^18.0.27",
+		"@types/react-dom": "^18.0.10",
 		"@typescript-eslint/eslint-plugin": "^5.52.0",
 		"@typescript-eslint/parser": "^5.52.0",
+		"@vitejs/plugin-react": "^3.1.0",
 		"commitlint": "^17.4.4",
 		"eslint": "^8.34.0",
 		"eslint-config-prettier": "^8.6.0",
 		"eslint-plugin,": "link:@typescript-eslint/eslint-plugin,",
 		"eslint-plugin-prettier": "^4.2.1",
+		"eslint-plugin-react-refresh": "^0.3.4",
 		"husky": "^8.0.3",
 		"prettier": "^2.8.4",
 		"rimraf": "^4.1.2",
 		"rollup": "^3.17.1",
 		"rollup-plugin-generate-package-json": "^3.2.0",
 		"rollup-plugin-typescript2": "^0.34.1",
-		"typescript": "^4.9.5"
+		"typescript": "^4.9.5",
+		"vite": "^4.1.0"
 	},
 	"dependencies": {
 		"@rollup/plugin-replace": "^5.0.2"
