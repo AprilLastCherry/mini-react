@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-03-08 12:14:10
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-11 21:05:13
+ * @LastEditTime: 2023-03-13 19:55:58
  * @description: 文件说明
  */
 import { Dispatch, Dispatcher } from 'react/src/currentDispatcher';
@@ -68,7 +68,7 @@ const HooksDispatcherOnMount: Dispatcher = {
 };
 
 function mountState<State>(
-	initialState: () => State | State
+	initialState: (() => State) | State
 ): [State, Dispatch<State>] {
 	// 得到（找到）当前useState对应的Hook数据
 	const hook = mountWorkInProgresHook();
@@ -89,6 +89,8 @@ function mountState<State>(
 	hook.memoizedState = memoizedState;
 
 	// 当前hook的触发跟新的方法，使用bind因为dispath可以脱离组件使用，依旧可以触发组件内的更新
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const dispatch = dispatchSetState.bind(
 		null,
 		currentlyRenderingFiber,
@@ -96,6 +98,7 @@ function mountState<State>(
 	);
 	// hook绑定自身hook跟新的方法
 	updateQueue.dispatch = dispatch;
+
 	return [memoizedState, dispatch];
 }
 

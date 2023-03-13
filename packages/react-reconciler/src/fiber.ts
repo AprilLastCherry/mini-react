@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-22 20:58:47
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-07 16:15:34
+ * @LastEditTime: 2023-03-11 22:06:21
  * @description: 文件说明
  */
 import { Props, Key, Ref, ReactElementType } from 'shared/ReactTypes';
@@ -16,6 +16,7 @@ export class FiberNode {
 	tag: WorkTag;
 	pendingProps: Props;
 	key: Key;
+	// 真实dom数据
 	stateNode: any;
 	ref: Ref;
 

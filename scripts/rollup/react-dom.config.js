@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-21 12:57:21
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-11 17:11:01
+ * @LastEditTime: 2023-03-13 17:57:01
  * @description: 文件说明
  */
 import { getPackageJSON, resolvePkgPath, getBaseRollupPlugins } from './utils';
@@ -22,12 +22,12 @@ export default [
 		output: [
 			{
 				file: `${pkgDistPath}/index.js`,
-				name: 'index.js',
+				name: 'ReactDom',
 				format: 'umd'
 			},
 			{
 				file: `${pkgDistPath}/client.js`,
-				name: 'client.js',
+				name: 'client',
 				format: 'umd'
 			}
 		],
@@ -54,5 +54,18 @@ export default [
 				})
 			})
 		]
+	},
+	// react-test-utils
+	{
+		input: `${pkgPath}/test-utils.ts`,
+		output: [
+			{
+				file: `${pkgDistPath}/test-utils.js`,
+				name: 'testUtils',
+				format: 'umd'
+			}
+		],
+		external: ['react-dom', 'react'],
+		plugins: getBaseRollupPlugins()
 	}
 ];

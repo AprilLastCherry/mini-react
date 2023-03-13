@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-20 23:01:06
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-02-24 23:46:48
+ * @LastEditTime: 2023-03-13 19:20:12
  * @description: 文件说明
  */
 import { REACT_ELEMENT_TYPE } from 'shared/ReactSymbols';
@@ -33,6 +33,14 @@ const ReactElement = function (
 
 	return element;
 };
+
+export function isValidElement(object: any) {
+	return (
+		typeof object === 'object' &&
+		object !== null &&
+		object.$$typeof === REACT_ELEMENT_TYPE
+	);
+}
 
 export const jsx = (type: ElementType, config: any, ...maybeChildren: any) => {
 	let key: Key = null;
