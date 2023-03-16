@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-25 16:29:10
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-08 12:17:11
+ * @LastEditTime: 2023-03-15 23:41:26
  * @description: 文件说明
  */
 import { ReactElementType } from 'shared/ReactTypes';
@@ -19,8 +19,7 @@ import {
 
 // 递归中的递阶段
 export const beginWork = (wip: FiberNode) => {
-	console.log('beginWork', wip);
-	// 比较，返回 childFiberNode
+	// 比较，返回 wip 工作单元的子节点 childFiberNode
 	switch (wip.tag) {
 		case HostRoot:
 			return updateHostRoot(wip);
@@ -72,7 +71,6 @@ function updateHostComponent(wip: FiberNode) {
 	return wip.child;
 }
 
-//
 function updateFunctionComponent(wip: FiberNode) {
 	const nextChildren = renderWithHooks(wip);
 	reconcilerChildren(wip, nextChildren);
@@ -87,11 +85,11 @@ function reconcilerChildren(wip: FiberNode, children?: ReactElementType) {
 
 	if (current !== null) {
 		// update
-		console.log('reconcilerChildren update', wip);
+		// console.log('reconcilerChildren update', wip);
 		wip.child = reconcilerChildFibers(wip, current?.child, children);
 	} else {
 		// mount
-		console.log('reconcilerChildren mount', wip);
+		// console.log('reconcilerChildren mount', wip);
 		wip.child = mountChildFibers(wip, null, children);
 	}
 }

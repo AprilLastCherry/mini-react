@@ -2,12 +2,12 @@
  * @Author: Leon
  * @Date: 2023-02-25 16:29:18
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-11 15:00:28
+ * @LastEditTime: 2023-03-16 01:16:42
  * @description: 文件说明
  */
 
 import { FiberNode } from './fiber';
-import { NoFlags } from './fiberFlags';
+import { NoFlags, Update } from './fiberFlags';
 import {
 	Container,
 	appendInitialChild,
@@ -20,10 +20,15 @@ import {
 	HostRoot,
 	HostText
 } from './workTags';
+import { updateFiberProps } from 'react-dom/src/SyntheticEvent';
+
+// 标记更新
+function markUpdate(fiber: FiberNode) {
+	fiber.flags |= Update;
+}
 
 // 递归中的归阶段
 export const completeWork = (wip: FiberNode) => {
-	console.log('completeWork', wip);
 	const newProps = wip.pendingProps;
 	const current = wip.alternate;
 
@@ -31,9 +36,11 @@ export const completeWork = (wip: FiberNode) => {
 		case HostComponent:
 			if (current !== null && wip.stateNode) {
 				// update
+				// 1.props 是否变化
+				updateFiberProps(wip.stateNode, newProps);
 			} else {
 				// 1. 构建离屏DOM
-				const instance = createInstace(wip.type);
+				const instance = createInstace(wip.type, newProps);
 				// 2. 将DOM插入到DOM树中
 				appendAllChildren(instance, wip);
 				// 对于HostComponent来说，比如jsx的<div>中的stateNode保存的就是div的Dom，return 才是父节点
@@ -46,7 +53,13 @@ export const completeWork = (wip: FiberNode) => {
 		case HostText:
 			if (current !== null && wip.stateNode) {
 				// update
+				const oldText = current.memoizedProps?.content;
+				const newText = newProps.content;
+				if (oldText !== newText) {
+					markUpdate(wip);
+				}
 			} else {
+				// mount
 				// 1. 构建DOM
 				const instance = createTextInstace(newProps.content);
 				// 2. 将DOM插入到DOM树中
@@ -71,6 +84,7 @@ export const completeWork = (wip: FiberNode) => {
 	}
 };
 
+// 子组件的dom前面归的时候已经生成了，将他们嵌入到当前组件的dom中
 function appendAllChildren(parent: Container, wip: FiberNode) {
 	let node = wip.child;
 	while (node !== null) {

@@ -36,7 +36,7 @@ export function updateContainer(
 	// 将 hostRootFiber 和普通 fiberNode 联系起来
 	const hostRootFiber = root.current;
 	// 为传入的reactElement创建一个update
-	console.log('传入的', element, root);
+	// console.log('传入的', element, root);
 	const update = createUpdate<ReactElementType | null>(element);
 
 	// 队列中加入创建好的update，即hostRootFiber.updateQueue.shared.pending = update;

@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-03-11 14:19:59
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-11 20:47:07
+ * @LastEditTime: 2023-03-16 00:42:59
  * @description: 文件说明
  */
 import { useState } from 'react';
@@ -13,9 +13,45 @@ function Child() {
 }
 
 function App() {
-	const [count, setCount] = useState(10);
-	console.log(count);
-	return <div>{count}</div>;
+	const [count, setCount] = useState(1);
+	// return (
+	// 	<div
+	// 		onClick={() => {
+	// 			console.log('div click');
+	// 		}}
+	// 		onClickCapture={() => {
+	// 			console.log('div onClickCapture');
+	// 		}}
+	// 	>
+	// 		<p
+	// 			onClick={(e) => {
+	// 				e.stopPropagation();
+	// 				console.log('p click');
+	// 			}}
+	// 			onClickCapture={() => {
+	// 				console.log('p onClickCapture');
+	// 			}}
+	// 		>
+	// 			<span
+	// 				onClick={() => {
+	// 					console.log('sp click');
+	// 					setCount(count + 1);
+	// 				}}
+	// 				onClickCapture={() => {
+	// 					console.log('sp onClickCapture');
+	// 				}}
+	// 			>
+	// 				{count === 3 ? <Child /> : count}
+	// 			</span>
+	// 		</p>
+	// 	</div>
+	// );
+
+	return (
+		<div onClick={() => setCount(count + 1)}>
+			{count === 3 ? <Child /> : count}
+		</div>
+	);
 }
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(

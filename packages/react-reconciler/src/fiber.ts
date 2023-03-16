@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-22 20:58:47
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-11 22:06:21
+ * @LastEditTime: 2023-03-16 01:49:22
  * @description: 文件说明
  */
 import { Props, Key, Ref, ReactElementType } from 'shared/ReactTypes';
@@ -30,6 +30,7 @@ export class FiberNode {
 	alternate: FiberNode | null;
 	flags: Flags;
 	subtreeFlags: Flags;
+	deletions: FiberNode[] | null;
 	updateQueue: unknown;
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
@@ -65,6 +66,7 @@ export class FiberNode {
 		// 副作用
 		this.flags = NoFlags;
 		this.subtreeFlags = NoFlags;
+		this.deletions = null;
 	}
 }
 
@@ -83,7 +85,12 @@ export class FiberRootNode {
 	}
 }
 
-// 创建一个workInProgress，是一个fiberNode
+/**
+ * 使用原有的fiberNode，传入新的props值，创建一个新的fiberNode作为工作单元判断更新逻辑，命名为workInProgress
+ * @param current root.current就是hostRootFiber
+ * @param pendingProps 更新的值
+ * @returns hostRootFiber 的工作单元 wip（FiberNode）
+ */
 export const createWorkInProgress = (
 	current: FiberNode,
 	pendingProps: Props
@@ -99,7 +106,7 @@ export const createWorkInProgress = (
 
 		// 当前的节点，创建出新的fiberNode，当前fiberNode就是过去式了
 		wip.alternate = current;
-		// ??
+		// 双缓存绑定
 		current.alternate = wip;
 	} else {
 		// update
@@ -107,6 +114,7 @@ export const createWorkInProgress = (
 		// 副作用的东西清除掉，是上一次遗留的内容
 		wip.flags = NoFlags;
 		wip.subtreeFlags = NoFlags;
+		wip.deletions = null;
 	}
 
 	wip.type = current.type;

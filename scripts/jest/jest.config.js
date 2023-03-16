@@ -6,7 +6,7 @@
  * @description: 文件说明
  */
 const { defaults } = require('jest-config');
-console.log(process.cwd());
+// console.log(process.cwd());
 module.exports = {
 	...defaults,
 	rootDir: process.cwd(),

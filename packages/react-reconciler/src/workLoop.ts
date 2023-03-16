@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-25 16:31:52
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-08 11:13:36
+ * @LastEditTime: 2023-03-15 19:18:41
  * @description: 文件说明
  */
 import { beginWork } from './beginWork';
@@ -39,7 +39,7 @@ function markUpdateFromFiberToRoot(fiber: FiberNode) {
 		parent = node.return;
 	}
 
-	// 根节点，返回的是 fiberRootNode
+	// HostRoot是hostRootFiber，再往上返回就是 fiberRootNode 根节点
 	if (node.tag === HostRoot) {
 		return node.stateNode;
 	}
@@ -70,7 +70,7 @@ function renderRoot(root: FiberRootNode) {
 	root.finishedWord = finishedWord;
 	// wip fiberNode树 树中的flags
 	commitRoot(root);
-	console.log('commitRoot', root);
+	// console.log('commitRoot', root);
 }
 
 function commitRoot(root: FiberRootNode) {
@@ -87,12 +87,12 @@ function commitRoot(root: FiberRootNode) {
 	// 重置，数据已经存放到变量 finishedWork 中
 	root.finishedWord = null;
 
-	// 判断是否存在3个子接待您需要执行的操作
 	// 判断root本身flags和root的subtreeFlags
 	const subtreeHasEffect =
 		(finishedWork.subtreeFlags & MutationMask) !== NoFlags;
 	const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags;
 
+	// 有变化，需要跟新dom
 	if (subtreeHasEffect || rootHasEffect) {
 		// beforeMutation
 		// mutation Placement
@@ -142,6 +142,7 @@ function completeUnitOfWork(fiber: FiberNode) {
 		} else {
 			// 找不到兄弟节点，开始往上找父节点，父节点存在就执行归阶段，一直到没有父节点
 			node = node.return;
+			// 找到根节点的时候node就是null， workInProgress = null,就会结束workLoop循环
 			workInProgress = node;
 		}
 	} while (node !== null);
