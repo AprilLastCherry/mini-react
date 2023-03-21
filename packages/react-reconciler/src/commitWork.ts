@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-03-06 15:17:59
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-16 01:37:39
+ * @LastEditTime: 2023-03-21 11:51:53
  * @description: 文件说明
  */
 import { FiberNode, FiberRootNode } from './fiber';
@@ -17,6 +17,8 @@ import {
 	appendChildToContainer,
 	commitUpdate,
 	Container,
+	insertChildToContainer,
+	Instance,
 	removeChild
 } from 'hostConfig';
 import {
@@ -171,12 +173,50 @@ const commitPlacement = (finishedWork: FiberNode) => {
 
 	// parent DOM
 	const hostParent = getHostParent(finishedWork);
+	// host sibling
+	const sibling = getHostSibling(finishedWork);
 
 	if (hostParent !== null) {
 		// finishedWork ~~ 将DOM append 到 parent DOM 中
-		appendPlacementNodeIntoContainer(finishedWork, hostParent);
+		insertOrAppendPlacementNodeIntoContainer(finishedWork, hostParent, sibling);
 	}
 };
+
+function getHostSibling(fiber: FiberNode) {
+	let node: FiberNode = fiber;
+	// eslint-disable-next-line no-constant-condition
+	findSbiling: while (true) {
+		while (node.sibling === null) {
+			const parent = node.return;
+			if (
+				parent === null ||
+				parent.tag === HostComponent ||
+				parent.tag === HostRoot
+			) {
+				return null;
+			}
+			node = parent;
+		}
+		node.sibling.return = node.return;
+		node = node.sibling;
+
+		while (node.tag !== HostText && node.tag !== HostComponent) {
+			if ((node.flags & Placement) !== NoFlags) {
+				continue findSbiling;
+			}
+			if (node.child === null) {
+				continue findSbiling;
+			} else {
+				node.child.return = node;
+				node = node.child;
+			}
+		}
+
+		if ((node.flags & Placement) === NoFlags) {
+			return node.stateNode;
+		}
+	}
+}
 
 // 往上找到可以挂载的真实dom，Hook组件，函数组件时没有真实dom的，要往上找到最近的可以挂载的dom节点
 function getHostParent(fiber: FiberNode): Container | null {
@@ -200,13 +240,18 @@ function getHostParent(fiber: FiberNode): Container | null {
 	return null;
 }
 
-function appendPlacementNodeIntoContainer(
+function insertOrAppendPlacementNodeIntoContainer(
 	finishedWord: FiberNode,
-	hostParent: Container
+	hostParent: Container,
+	before?: Instance
 ) {
 	// 取出当前FiberNode对应的真实Dom，stateNode，挂在到最近的父真实dom上
 	if (finishedWord.tag === HostComponent || finishedWord.tag === HostText) {
-		appendChildToContainer(hostParent, finishedWord.stateNode);
+		if (before) {
+			insertChildToContainer(finishedWord.stateNode, hostParent, before);
+		} else {
+			appendChildToContainer(hostParent, finishedWord.stateNode);
+		}
 
 		return;
 	}
@@ -214,11 +259,11 @@ function appendPlacementNodeIntoContainer(
 	const child = finishedWord.child;
 
 	if (child !== null) {
-		appendPlacementNodeIntoContainer(child, hostParent);
+		insertOrAppendPlacementNodeIntoContainer(child, hostParent);
 		let sibling = child.sibling;
 
 		while (sibling !== null) {
-			appendPlacementNodeIntoContainer(sibling, hostParent);
+			insertOrAppendPlacementNodeIntoContainer(sibling, hostParent);
 
 			sibling = sibling.sibling;
 		}

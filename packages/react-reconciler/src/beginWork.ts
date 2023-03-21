@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-25 16:29:10
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-15 23:41:26
+ * @LastEditTime: 2023-03-21 11:26:17
  * @description: 文件说明
  */
 import { ReactElementType } from 'shared/ReactTypes';
@@ -85,11 +85,11 @@ function reconcilerChildren(wip: FiberNode, children?: ReactElementType) {
 
 	if (current !== null) {
 		// update
-		// console.log('reconcilerChildren update', wip);
+		console.log('reconcilerChildren update', children);
 		wip.child = reconcilerChildFibers(wip, current?.child, children);
 	} else {
 		// mount
-		// console.log('reconcilerChildren mount', wip);
+		console.log('reconcilerChildren mount', children);
 		wip.child = mountChildFibers(wip, null, children);
 	}
 }
