@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-03-08 12:14:10
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-17 14:49:33
+ * @LastEditTime: 2023-03-22 16:42:41
  * @description: 文件说明
  */
 import { Dispatch, Dispatcher } from 'react/src/currentDispatcher';
@@ -60,7 +60,6 @@ export function renderWithHooks(wip: FiberNode) {
 
 	const { type: Component, pendingProps } = wip;
 	// 函数组件执行就是在 Component 调用的时候运行的
-	// console.log('开始创建useState')
 	const children = Component(pendingProps);
 
 	// 重置操作

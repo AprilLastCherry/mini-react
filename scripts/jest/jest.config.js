@@ -2,11 +2,10 @@
  * @Author: Leon
  * @Date: 2023-03-13 17:59:54
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-13 18:43:07
+ * @LastEditTime: 2023-03-22 16:42:58
  * @description: 文件说明
  */
 const { defaults } = require('jest-config');
-// console.log(process.cwd());
 module.exports = {
 	...defaults,
 	rootDir: process.cwd(),

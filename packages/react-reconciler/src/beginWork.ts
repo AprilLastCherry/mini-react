@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-25 16:29:10
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-21 11:26:17
+ * @LastEditTime: 2023-03-22 16:42:33
  * @description: 文件说明
  */
 import { ReactElementType } from 'shared/ReactTypes';
@@ -14,7 +14,8 @@ import {
 	FunctionComponent,
 	HostComponent,
 	HostRoot,
-	HostText
+	HostText,
+	Fragment
 } from './workTags';
 
 // 递归中的递阶段
@@ -29,15 +30,21 @@ export const beginWork = (wip: FiberNode) => {
 			return null;
 		case FunctionComponent:
 			return updateFunctionComponent(wip);
+		case Fragment:
+			return updateFragment(wip);
 		default:
 			if (__DEV__) {
 				console.warn('beginWork未实现的类型', wip.tag);
 			}
-			break;
+			return null;
 	}
-
-	return null;
 };
+
+function updateFragment(wip: FiberNode) {
+	const nextChildren = wip.pendingProps;
+	reconcilerChildren(wip, nextChildren);
+	return wip.child;
+}
 
 // 根节点的子节点
 function updateHostRoot(wip: FiberNode) {
@@ -85,11 +92,11 @@ function reconcilerChildren(wip: FiberNode, children?: ReactElementType) {
 
 	if (current !== null) {
 		// update
-		console.log('reconcilerChildren update', children);
+		// console.log('reconcilerChildren update', children);
 		wip.child = reconcilerChildFibers(wip, current?.child, children);
 	} else {
 		// mount
-		console.log('reconcilerChildren mount', children);
+		// console.log('reconcilerChildren mount', children);
 		wip.child = mountChildFibers(wip, null, children);
 	}
 }

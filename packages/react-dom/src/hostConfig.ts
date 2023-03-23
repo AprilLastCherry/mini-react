@@ -1,14 +1,13 @@
-import { DOMElement } from 'react';
 import { FiberNode } from 'react-reconciler/src/fiber';
 import { HostComponent, HostText } from 'react-reconciler/src/workTags';
 import { Props } from 'shared/ReactTypes';
-import { updateFiberProps } from './SyntheticEvent';
+import { DOMElement, updateFiberProps } from './SyntheticEvent';
 
 /*
  * @Author: Leon
  * @Date: 2023-03-06 17:23:23
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-21 11:17:59
+ * @LastEditTime: 2023-03-21 18:56:40
  * @description: 文件说明
  */
 export type Container = Element;
@@ -63,7 +62,6 @@ export function removeChild(
 	child: Instance | TextInstance,
 	container: Container
 ) {
-	console.log(container, child);
 	container.removeChild(child);
 }
 

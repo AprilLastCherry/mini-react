@@ -2,11 +2,16 @@
  * @Author: Leon
  * @Date: 2023-02-22 20:58:47
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-16 01:49:22
+ * @LastEditTime: 2023-03-22 18:09:56
  * @description: 文件说明
  */
 import { Props, Key, Ref, ReactElementType } from 'shared/ReactTypes';
-import { FunctionComponent, HostComponent, WorkTag } from './workTags';
+import {
+	Fragment,
+	FunctionComponent,
+	HostComponent,
+	WorkTag
+} from './workTags';
 import { Flags, NoFlags } from './fiberFlags';
 import { Container } from 'hostConfig';
 
@@ -35,7 +40,7 @@ export class FiberNode {
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
 		this.tag = tag;
-		this.key = key;
+		this.key = key || null;
 		this.ref = null;
 
 		// 对于HostComponent来说，比如jsx的<div>中的stateNode保存的就是div的Dom
@@ -139,5 +144,10 @@ export function createFiberFromElement(element: ReactElementType) {
 
 	const fiber = new FiberNode(fiberTag, props, key);
 	fiber.type = type;
+	return fiber;
+}
+
+export function createFiberFromFragment(elements: any[], key: Key): FiberNode {
+	const fiber = new FiberNode(Fragment, elements, key);
 	return fiber;
 }

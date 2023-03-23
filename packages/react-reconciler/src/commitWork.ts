@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-03-06 15:17:59
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-21 11:51:53
+ * @LastEditTime: 2023-03-21 18:50:46
  * @description: 文件说明
  */
 import { FiberNode, FiberRootNode } from './fiber';
@@ -88,24 +88,46 @@ const commitMutationEffectsOnFiber = (finishedWork: FiberNode) => {
 	}
 };
 
+function recordHostChildrenToDelete(
+	hostChildrenToDelete: FiberNode[],
+	unmountFiber: FiberNode
+) {
+	// 1. 找到第一个root host节点
+	const lastOne = hostChildrenToDelete[hostChildrenToDelete.length - 1];
+	if (!lastOne) {
+		hostChildrenToDelete.push(unmountFiber);
+	} else {
+		let node = lastOne.sibling;
+		while (node !== null) {
+			if (unmountFiber === node) {
+				hostChildrenToDelete.push(unmountFiber);
+			}
+			node = node.sibling;
+		}
+	}
+	// 2. 每找到一个host节点，判断下这个节点是不是 1 中找到的那个节点的兄弟节点
+}
+
 // 节点被删除，需要删除节点下的所有子节点
 function commitDeletion(childToDelete: FiberNode) {
-	let rootHostNode: FiberNode | null = null;
+	const rootChildrenToDelete: FiberNode[] = [];
 	// 遍历子节点，每个节点都需要处理解绑和删除
 	commitNestedComponent(childToDelete, (unmountFiber) => {
 		switch (unmountFiber.tag) {
 			case HostComponent:
-				if (rootHostNode === null) {
-					// rootHostNode为空表示当前节点是要删除的真实DOM的根节点
-					rootHostNode = unmountFiber;
-				}
+				// if (rootHostNode === null) {
+				// 	// rootHostNode为空表示当前节点是要删除的真实DOM的根节点
+				// 	rootHostNode = unmountFiber;
+				// }
+				recordHostChildrenToDelete(rootChildrenToDelete, unmountFiber);
 				// TODO  解绑ref
 				return;
 
 			case HostText:
-				if (rootHostNode === null) {
-					rootHostNode = unmountFiber;
-				}
+				// if (rootHostNode === null) {
+				// 	rootHostNode = unmountFiber;
+				// }
+				recordHostChildrenToDelete(rootChildrenToDelete, unmountFiber);
 				return;
 
 			case FunctionComponent:
@@ -120,11 +142,13 @@ function commitDeletion(childToDelete: FiberNode) {
 	});
 
 	// 找到了需要删除的整个真实Dom根节点
-	if (rootHostNode !== null) {
+	if (rootChildrenToDelete.length) {
 		// 找到要被删除的根节点再上一层的最近的真实DOM节点，才可以进行删除操作
 		const hostParent = getHostParent(childToDelete);
 		if (hostParent !== null) {
-			removeChild((rootHostNode as FiberNode).stateNode, hostParent);
+			rootChildrenToDelete.forEach((node) => {
+				removeChild(node.stateNode, hostParent);
+			});
 		}
 	}
 

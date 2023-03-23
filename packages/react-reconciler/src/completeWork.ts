@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-25 16:29:18
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-16 01:16:42
+ * @LastEditTime: 2023-03-21 17:17:19
  * @description: 文件说明
  */
 
@@ -15,6 +15,7 @@ import {
 	createTextInstace
 } from 'hostConfig';
 import {
+	Fragment,
 	FunctionComponent,
 	HostComponent,
 	HostRoot,
@@ -70,10 +71,8 @@ export const completeWork = (wip: FiberNode) => {
 			return null;
 
 		case HostRoot:
-			bubbleProperties(wip);
-			return null;
-
 		case FunctionComponent:
+		case Fragment:
 			bubbleProperties(wip);
 			return null;
 

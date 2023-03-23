@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-20 23:11:04
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-02-20 23:30:41
+ * @LastEditTime: 2023-03-21 16:45:40
  * @description: 文件说明
  */
 const supportSymbol = typeof Symbol === 'function' && Symbol.for;
@@ -11,3 +11,7 @@ const supportSymbol = typeof Symbol === 'function' && Symbol.for;
 export const REACT_ELEMENT_TYPE = supportSymbol
 	? Symbol.for('react.element')
 	: 0xeac7;
+
+export const REACT_FRAGMENT_TYPE = supportSymbol
+	? Symbol.for('react.fragment')
+	: 0xeacb;

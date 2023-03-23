@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-25 16:31:52
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-15 19:18:41
+ * @LastEditTime: 2023-03-22 16:42:54
  * @description: 文件说明
  */
 import { beginWork } from './beginWork';
@@ -70,7 +70,6 @@ function renderRoot(root: FiberRootNode) {
 	root.finishedWord = finishedWord;
 	// wip fiberNode树 树中的flags
 	commitRoot(root);
-	// console.log('commitRoot', root);
 }
 
 function commitRoot(root: FiberRootNode) {

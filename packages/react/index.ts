@@ -2,12 +2,12 @@
  * @Author: Leon
  * @Date: 2023-02-20 23:54:14
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-15 20:31:41
+ * @LastEditTime: 2023-03-22 18:39:51
  * @description: 文件说明
  */
 import { Dispatcher, resolveDispatcher } from './src/currentDispatcher';
 import currentDispatcher from './src/currentDispatcher';
-import { jsx, jsxDEV, isValidElement as isValidElementFn } from './src/jsx';
+import { jsx, isValidElement as isValidElementFn } from './src/jsx';
 
 export const useState: Dispatcher['useState'] = (initialState) => {
 	/**

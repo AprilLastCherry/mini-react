@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-03-14 16:44:50
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-14 21:55:58
+ * @LastEditTime: 2023-03-22 16:42:23
  * @description: 合成事件
  */
 import { Container } from 'hostConfig';
@@ -39,7 +39,7 @@ export function initEvent(container: Container, eventType: string) {
 	}
 
 	if (__DEV__) {
-		// console.log('初始化事件: ', eventType);
+		console.log('初始化事件: ', eventType);
 	}
 
 	container.addEventListener(eventType, (e) => {
@@ -50,10 +50,9 @@ export function initEvent(container: Container, eventType: string) {
 
 function dispatchEvent(container: Container, eventType: string, e: Event) {
 	const targetELement = e.target;
-	// console.log(11);
 
 	if (targetELement === null) {
-		// console.log('事件不存在target', e);
+		console.log('事件不存在target', e);
 		return;
 	}
 	// 1. 收集沿途的事件
