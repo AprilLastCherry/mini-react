@@ -2,13 +2,14 @@
  * @Author: Leon
  * @Date: 2023-03-08 12:14:10
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-22 16:42:41
+ * @LastEditTime: 2023-03-29 12:08:02
  * @description: 文件说明
  */
 import { Dispatch, Dispatcher } from 'react/src/currentDispatcher';
 import internals from 'shared/internals';
 import { Action } from 'shared/ReactTypes';
 import { FiberNode } from './fiber';
+import { Lane, NoLane, requestUpdateLanes } from './fiberLanes';
 import {
 	createUpdate,
 	createUpdateQueue,
@@ -21,6 +22,7 @@ import { scheduleUpdateOnFiber } from './workLoop';
 let currentlyRenderingFiber: FiberNode | null = null;
 let workInProgressHook: Hook | null = null;
 let currentHook: Hook | null = null;
+let renderLane: Lane = NoLane;
 // 公共数据集
 const { currentDispatcher } = internals;
 
@@ -42,11 +44,12 @@ const HooksDispatcherOnUpdate: Dispatcher = {
 };
 
 // 函数组件JSX转FiberNode
-export function renderWithHooks(wip: FiberNode) {
+export function renderWithHooks(wip: FiberNode, lane: Lane) {
 	// 赋值操作
 	currentlyRenderingFiber = wip;
 	// 重置
 	wip.memoizedState = null;
+	renderLane = lane;
 
 	const current = wip.alternate;
 	if (current !== null) {
@@ -64,6 +67,7 @@ export function renderWithHooks(wip: FiberNode) {
 
 	// 重置操作
 	currentlyRenderingFiber = null;
+	renderLane = NoLane;
 
 	return children;
 }
@@ -145,7 +149,11 @@ function updateState<State>(): [State, Dispatch<State>] {
 	const pending = queue.shared.pending;
 
 	if (pending !== null) {
-		const { memoizedState } = processUpdateQueue(hook.memoizedState, pending);
+		const { memoizedState } = processUpdateQueue(
+			hook.memoizedState,
+			pending,
+			renderLane
+		);
 		hook.memoizedState = memoizedState;
 	}
 
@@ -214,9 +222,11 @@ function dispatchSetState<State>(
 	updateQueue: UpdateQueue<State>,
 	action: Action<State>
 ) {
+	const lane = requestUpdateLanes();
 	// 用户使用更新方法传入最新值，用最新值创建 update， 更新到 updateQueue 中
-	const update = createUpdate(action);
+	const update = createUpdate(action, lane);
+	// 创建环状链表
 	enqueueUpdate(updateQueue, update);
 	// 有了新的update，再调度的时候，可以根据新的数据，得到新的fiberNode树
-	scheduleUpdateOnFiber(fiber);
+	scheduleUpdateOnFiber(fiber, lane);
 }

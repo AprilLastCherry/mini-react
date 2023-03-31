@@ -2,13 +2,14 @@
  * @Author: Leon
  * @Date: 2023-02-25 16:29:10
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-22 16:42:33
+ * @LastEditTime: 2023-03-28 11:53:25
  * @description: 文件说明
  */
 import { ReactElementType } from 'shared/ReactTypes';
 import { mountChildFibers, reconcilerChildFibers } from './childFibers';
 import { FiberNode } from './fiber';
 import { renderWithHooks } from './fiberHooks';
+import { Lane } from './fiberLanes';
 import { processUpdateQueue, UpdateQueue } from './updateQueue';
 import {
 	FunctionComponent,
@@ -19,17 +20,17 @@ import {
 } from './workTags';
 
 // 递归中的递阶段
-export const beginWork = (wip: FiberNode) => {
+export const beginWork = (wip: FiberNode, renderLane: Lane) => {
 	// 比较，返回 wip 工作单元的子节点 childFiberNode
 	switch (wip.tag) {
 		case HostRoot:
-			return updateHostRoot(wip);
+			return updateHostRoot(wip, renderLane);
 		case HostComponent:
 			return updateHostComponent(wip);
 		case HostText:
 			return null;
 		case FunctionComponent:
-			return updateFunctionComponent(wip);
+			return updateFunctionComponent(wip, renderLane);
 		case Fragment:
 			return updateFragment(wip);
 		default:
@@ -47,7 +48,7 @@ function updateFragment(wip: FiberNode) {
 }
 
 // 根节点的子节点
-function updateHostRoot(wip: FiberNode) {
+function updateHostRoot(wip: FiberNode, renderLane: Lane) {
 	const baseState = wip.memoizedState;
 	const updateQueue = wip.updateQueue as UpdateQueue<Element>;
 	const pending = updateQueue.shared.pending;
@@ -55,7 +56,7 @@ function updateHostRoot(wip: FiberNode) {
 	updateQueue.shared.pending = null;
 
 	// 新的pending值替换旧的baseState
-	const { memoizedState } = processUpdateQueue(baseState, pending);
+	const { memoizedState } = processUpdateQueue(baseState, pending, renderLane);
 
 	wip.memoizedState = memoizedState;
 
@@ -78,8 +79,8 @@ function updateHostComponent(wip: FiberNode) {
 	return wip.child;
 }
 
-function updateFunctionComponent(wip: FiberNode) {
-	const nextChildren = renderWithHooks(wip);
+function updateFunctionComponent(wip: FiberNode, renderLane: Lane) {
+	const nextChildren = renderWithHooks(wip, renderLane);
 	reconcilerChildren(wip, nextChildren);
 
 	return wip.child;

@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-03-11 14:19:59
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-22 18:04:18
+ * @LastEditTime: 2023-03-31 16:30:15
  * @description: 文件说明
  */
 import { useState } from 'react';
@@ -16,10 +16,17 @@ function App() {
 			: [<li key="3">3</li>, <li key="2">2</li>, <li key="1">1</li>];
 
 	return (
-		<ul onClickCapture={() => setCount(count + 1)}>
-			<li key="jie">节点</li>
-			<li key="wen">文本</li>
-			{arr}
+		<ul
+			onClickCapture={() => {
+				let num = count + 1;
+				setCount(num);
+				num += 1;
+				setCount(num);
+				num += 1;
+				setCount(num);
+			}}
+		>
+			{count}
 		</ul>
 	);
 }

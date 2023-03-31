@@ -2,12 +2,13 @@
  * @Author: Leon
  * @Date: 2023-02-28 23:41:29
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-22 16:42:48
+ * @LastEditTime: 2023-03-24 22:17:40
  * @description: 文件说明
  */
 import { Container } from 'hostConfig';
 import { ReactElementType } from 'shared/ReactTypes';
 import { FiberNode, FiberRootNode } from './fiber';
+import { requestUpdateLanes } from './fiberLanes';
 import {
 	createUpdate,
 	createUpdateQueue,
@@ -33,10 +34,11 @@ export function updateContainer(
 	element: ReactElementType | null,
 	root: FiberRootNode
 ) {
+	const lane = requestUpdateLanes();
 	// 将 hostRootFiber 和普通 fiberNode 联系起来
 	const hostRootFiber = root.current;
 	// 为传入的reactElement创建一个update
-	const update = createUpdate<ReactElementType | null>(element);
+	const update = createUpdate<ReactElementType | null>(element, lane);
 
 	// 队列中加入创建好的update，即hostRootFiber.updateQueue.shared.pending = update;
 	enqueueUpdate(
@@ -44,7 +46,7 @@ export function updateContainer(
 		update
 	);
 
-	scheduleUpdateOnFiber(hostRootFiber);
+	scheduleUpdateOnFiber(hostRootFiber, lane);
 
 	return element;
 }

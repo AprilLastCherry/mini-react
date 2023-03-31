@@ -7,7 +7,7 @@ import { DOMElement, updateFiberProps } from './SyntheticEvent';
  * @Author: Leon
  * @Date: 2023-03-06 17:23:23
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-21 18:56:40
+ * @LastEditTime: 2023-03-24 23:03:30
  * @description: 文件说明
  */
 export type Container = Element;
@@ -72,3 +72,11 @@ export function insertChildToContainer(
 ) {
 	container.insertBefore(child, before);
 }
+
+// 创建微任务，实在没有创建宏任务
+export const scheduleMicroTask =
+	typeof queueMicrotask === 'function'
+		? queueMicrotask
+		: typeof Promise === 'function'
+		? (callback: (...arg: any) => void) => Promise.resolve(null).then(callback)
+		: setTimeout;
