@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-22 20:58:47
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-24 22:16:05
+ * @LastEditTime: 2023-04-06 14:04:33
  * @description: 文件说明
  */
 import { Props, Key, Ref, ReactElementType } from 'shared/ReactTypes';
@@ -15,6 +15,7 @@ import {
 import { Flags, NoFlags } from './fiberFlags';
 import { Container } from 'hostConfig';
 import { Lane, Lanes, NoLane, NoLanes } from './fiberLanes';
+import { Effect } from './fiberHooks';
 
 // 介于ReactElment和DomELement之间的数据FiberNode，FiberNode用来关联两者，Reconciler算法操作fiberNode去调度协调两者
 export class FiberNode {
@@ -76,6 +77,12 @@ export class FiberNode {
 	}
 }
 
+// 存放effect的回调
+export interface PendingPassiveEffects {
+	umount: Effect[];
+	update: Effect[];
+}
+
 // 根节点，将 FiberRootNode 和 hostRootFiber 联系起来
 export class FiberRootNode {
 	container: Container;
@@ -83,6 +90,7 @@ export class FiberRootNode {
 	finishedWord: FiberNode | null; //？？
 	pendingLanes: Lanes;
 	finishedLane: Lane;
+	pendingPassiveEffects: PendingPassiveEffects;
 	constructor(container: Container, hostRootFiber: FiberNode) {
 		this.container = container;
 		// FiberRootNode的子节点事hostRootFiber，用current联系起来
@@ -92,6 +100,11 @@ export class FiberRootNode {
 		this.finishedWord = null;
 		this.pendingLanes = NoLanes;
 		this.finishedLane = NoLane;
+
+		this.pendingPassiveEffects = {
+			umount: [],
+			update: []
+		};
 	}
 }
 

@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-03-11 15:21:03
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-11 20:27:20
+ * @LastEditTime: 2023-04-02 14:48:29
  * @description: 文件说明
  */
 
@@ -12,6 +12,7 @@ export type Dispatch<State> = (action: Action<State>) => void;
 
 export interface Dispatcher {
 	useState: <T>(initialState: (() => T) | T) => [T, Dispatch<T>];
+	useEffect: (callback: () => void, deps: any[] | void) => void;
 }
 
 const currentDispatcher: { current: Dispatcher | null } = {

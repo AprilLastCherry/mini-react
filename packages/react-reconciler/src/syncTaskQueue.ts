@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-03-24 22:52:55
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-31 16:34:26
+ * @LastEditTime: 2023-03-31 21:28:22
  * @description: 文件说明
  */
 let syncQueue: ((...arg: any) => void)[] | null = null;
@@ -29,6 +29,7 @@ export function flushSyncCallbacks() {
 			}
 		} finally {
 			isFlushingSyncQueue = false;
+			syncQueue = null;
 		}
 	}
 }

@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-20 23:54:14
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-22 18:39:51
+ * @LastEditTime: 2023-04-02 14:48:40
  * @description: 文件说明
  */
 import { Dispatcher, resolveDispatcher } from './src/currentDispatcher';
@@ -18,6 +18,12 @@ export const useState: Dispatcher['useState'] = (initialState) => {
 	const dispatcher = resolveDispatcher();
 
 	return dispatcher.useState(initialState);
+};
+
+export const useEffect: Dispatcher['useEffect'] = (create, deps) => {
+	const dispatcher = resolveDispatcher();
+
+	return dispatcher.useEffect(create, deps);
 };
 
 // 内部数据共享层

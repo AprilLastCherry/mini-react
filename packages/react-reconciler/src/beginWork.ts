@@ -2,7 +2,7 @@
  * @Author: Leon
  * @Date: 2023-02-25 16:29:10
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-28 11:53:25
+ * @LastEditTime: 2023-03-31 21:35:05
  * @description: 文件说明
  */
 import { ReactElementType } from 'shared/ReactTypes';
@@ -52,7 +52,6 @@ function updateHostRoot(wip: FiberNode, renderLane: Lane) {
 	const baseState = wip.memoizedState;
 	const updateQueue = wip.updateQueue as UpdateQueue<Element>;
 	const pending = updateQueue.shared.pending;
-
 	updateQueue.shared.pending = null;
 
 	// 新的pending值替换旧的baseState

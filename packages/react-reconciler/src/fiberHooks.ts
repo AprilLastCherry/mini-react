@@ -2,14 +2,16 @@
  * @Author: Leon
  * @Date: 2023-03-08 12:14:10
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-29 12:08:02
+ * @LastEditTime: 2023-04-06 14:45:49
  * @description: 文件说明
  */
 import { Dispatch, Dispatcher } from 'react/src/currentDispatcher';
 import internals from 'shared/internals';
 import { Action } from 'shared/ReactTypes';
 import { FiberNode } from './fiber';
+import { Flags, PassiveEffect } from './fiberFlags';
 import { Lane, NoLane, requestUpdateLanes } from './fiberLanes';
+import { HookHasEffect, Passive } from './hookEffectTags';
 import {
 	createUpdate,
 	createUpdateQueue,
@@ -35,20 +37,31 @@ interface Hook {
 	next: Hook | null;
 }
 
-const HooksDispatcherOnMount: Dispatcher = {
-	useState: mountState
-};
+export interface Effect {
+	tag: Flags;
+	create: EffectCallback | void;
+	destory: EffectCallback | void;
+	deps: EffectDeps;
+	next: Effect | null;
+}
 
-const HooksDispatcherOnUpdate: Dispatcher = {
-	useState: updateState
-};
+// FiberNode上加属性lastEffect指向最后的effect
+export interface FCUpdateQueue<State> extends UpdateQueue<State> {
+	lastEffect: Effect | null;
+}
+
+// useEffect(EffectCallback, EffectDeps)
+type EffectCallback = () => void;
+type EffectDeps = any[] | null;
 
 // 函数组件JSX转FiberNode
 export function renderWithHooks(wip: FiberNode, lane: Lane) {
 	// 赋值操作
 	currentlyRenderingFiber = wip;
-	// 重置
+	// 重置 hooks 链表
 	wip.memoizedState = null;
+	// 重置 effect 链表
+	wip.updateQueue = null;
 	renderLane = lane;
 
 	const current = wip.alternate;
@@ -70,6 +83,130 @@ export function renderWithHooks(wip: FiberNode, lane: Lane) {
 	renderLane = NoLane;
 
 	return children;
+}
+
+const HooksDispatcherOnMount: Dispatcher = {
+	useState: mountState,
+	useEffect: mountEffect
+};
+
+const HooksDispatcherOnUpdate: Dispatcher = {
+	useState: updateState,
+	useEffect: updateEffect
+};
+
+function mountEffect(create: EffectCallback | void, deps: EffectDeps | void) {
+	const hook = mountWorkInProgresHook();
+	const nextDeps = deps === undefined ? null : deps;
+	(currentlyRenderingFiber as FiberNode).flags |= PassiveEffect;
+
+	hook.memoizedState = pushEffect(
+		Passive | HookHasEffect,
+		create,
+		undefined,
+		nextDeps
+	);
+}
+
+function updateEffect(create: EffectCallback | void, deps: EffectDeps | void) {
+	const hook = updateWorkInProgresHook();
+	const nextDeps = deps === undefined ? null : deps;
+	let destory: EffectCallback | void;
+
+	if (currentHook !== null) {
+		// 前一次异步更新的hook
+		const prevEffect = currentHook.memoizedState as Effect;
+		destory = prevEffect.destory;
+
+		if (nextDeps !== null) {
+			// 浅比较依赖
+			const prevDeps = prevEffect.deps;
+			if (areHookInputsEqual(nextDeps, prevDeps)) {
+				// 本次不更新
+				hook.memoizedState = pushEffect(Passive, create, destory, nextDeps);
+				return;
+			}
+		}
+		// 浅比较后不相等,执行副作用
+		(currentlyRenderingFiber as FiberNode).flags |= PassiveEffect;
+		hook.memoizedState = pushEffect(
+			Passive | HookHasEffect,
+			create,
+			destory,
+			nextDeps
+		);
+	}
+}
+
+function areHookInputsEqual(nextDeps: EffectDeps, prevDeps: EffectDeps) {
+	if (prevDeps === null || nextDeps === null) {
+		return false;
+	}
+
+	for (let i = 0; i < prevDeps.length && i < nextDeps.length; i++) {
+		if (Object.is(prevDeps[i], nextDeps[i])) {
+			continue;
+		}
+
+		return false;
+	}
+
+	return true;
+}
+
+// 返回当前的hook，同时在fiberNode上
+function pushEffect(
+	hookFlags: Flags,
+	create: EffectCallback | void,
+	destory: EffectCallback | void,
+	deps: EffectDeps
+): Effect {
+	const effect: Effect = {
+		tag: hookFlags,
+		create,
+		destory,
+		deps,
+		next: null
+	};
+
+	// 当前的fiberNode的updateQueue
+	const fiber = currentlyRenderingFiber as FiberNode;
+	const updateQueue = fiber.updateQueue as FCUpdateQueue<any>;
+
+	if (updateQueue === null) {
+		const updateQueue = createFCUpdateQueue();
+		fiber.updateQueue = updateQueue;
+		// effect与自己形成环状链表
+		effect.next = effect;
+		// fiber.updateQueue.lastEffect指向当前的effect
+		updateQueue.lastEffect = effect;
+	} else {
+		// 插入effect
+		const lastEffect = updateQueue.lastEffect;
+		// fiber.updateQueue存在，但是不存在lastEffect，需要重新创建effect的环状链表
+		if (lastEffect === null) {
+			effect.next = effect;
+			updateQueue.lastEffect = effect;
+		} else {
+			// 最后一个effect的next是第一个effect
+			const firstEffect = lastEffect.next;
+			// 最后一个effect下一个effect指向当前的新effect
+			lastEffect.next = effect;
+			// 最新的effect指向第一个effect，环状链表插入了最新的effect
+			effect.next = firstEffect;
+			// fiber上的updateQueue.lastEffect存最新的effect
+			updateQueue.lastEffect = effect;
+		}
+	}
+
+	return effect;
+}
+
+// 创建useEffect的hook，其中hook.updateQueue数据多一个属性lastEffect用来指向下一个useEffect
+function createFCUpdateQueue<State>() {
+	const updateQueue = createUpdateQueue<State>() as FCUpdateQueue<State>;
+	updateQueue.lastEffect = null;
+	return updateQueue;
 }
 
 function mountState<State>(
@@ -147,6 +284,7 @@ function updateState<State>(): [State, Dispatch<State>] {
 	// 计算新的state的逻辑
 	const queue = hook.updateQueue as UpdateQueue<State>;
 	const pending = queue.shared.pending;
+	queue.shared.pending = null;
 
 	if (pending !== null) {
 		const { memoizedState } = processUpdateQueue(

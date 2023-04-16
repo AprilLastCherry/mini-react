@@ -2,33 +2,39 @@
  * @Author: Leon
  * @Date: 2023-03-11 14:19:59
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-03-31 16:30:15
+ * @LastEditTime: 2023-04-03 16:06:17
  * @description: 文件说明
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 
 function App() {
-	const [count, setCount] = useState(1);
-	const arr =
-		count % 2 === 0
-			? [<li key="1">1</li>, <li key="2">2</li>, <li key="3">3</li>]
-			: [<li key="3">3</li>, <li key="2">2</li>, <li key="1">1</li>];
+	const [num, updateNum] = useState(0);
+	useEffect(() => {
+		console.log('App mount');
+	}, []);
+
+	useEffect(() => {
+		console.log('num change create', num);
+		return () => {
+			console.log('num change destroy', num);
+		};
+	}, [num]);
 
 	return (
-		<ul
-			onClickCapture={() => {
-				let num = count + 1;
-				setCount(num);
-				num += 1;
-				setCount(num);
-				num += 1;
-				setCount(num);
-			}}
-		>
-			{count}
-		</ul>
+		<div onClick={() => updateNum(num + 1)}>
+			{num === 0 ? <Child /> : 'noop'}
+		</div>
 	);
+}
+
+function Child() {
+	useEffect(() => {
+		console.log('Child mount');
+		return () => console.log('Child unmount');
+	}, []);
+
+	return 'i am child';
 }
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
